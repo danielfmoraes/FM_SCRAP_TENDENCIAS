@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import logging
 import matplotlib.pyplot as plt
+os.environ['QT_QPA_PLATFORM'] = 'xcb'
 from wordcloud import WordCloud
 from src.scrapers import AbrafacScraper, InfraFMScraper, GoogleScholarScraper, IfmaScraper
 from src.utils.helpers import ensure_dir

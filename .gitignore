@@ -176,3 +176,48 @@ Thumbs.db
 .venv/*
 !.venv/src/
 
+# Ignorar todos os arquivos na pasta data
+data/
+data/raw/
+data/processed/
+
+# Ignorar arquivos específicos de dados
+*.csv
+*.json
+*.html
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Arquivos de cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Arquivos de configuração de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de log
+*.log
+logs/
+
+# Arquivos temporários
+*.tmp
+*.bak
