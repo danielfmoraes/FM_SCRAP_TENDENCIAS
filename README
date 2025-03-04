@@ -34,7 +34,7 @@ Os dados coletados são processados, categorizados e armazenados para análise d
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/tendencias-fm.git
+   git clone https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git
    cd tendencias-fm
 
 2.Crie e ative um ambiente virtual:
@@ -106,7 +106,7 @@ Abra um Pull Request
 📞 Contato
 Seu Nome - [danielfmoraes@proton.me](mailto:danielfmoraes@proton.me)
 
-Link do Projeto: [https://github.com/seu-usuario/tendencias-fm](https://github.com/seu-usuario/tendencias-fm)
+Link do Projeto: [https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git)
 
 🙏 Agradecimentos
 [ABRAFAC](https://abrafac.org.br/) por disponibilizar conteúdo sobre FM
