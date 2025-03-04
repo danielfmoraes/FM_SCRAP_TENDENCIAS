@@ -1,9 +1,13 @@
+import os
 import time
 import logging
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,19 +23,60 @@ class GoogleScholarScraper:
         self.driver = self._setup_driver()
     
     def _setup_driver(self):
-        """Configura o driver do Selenium"""
-        options = Options()
-        if self.headless:
-            options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        """Configura o driver do Selenium com fallback de Chrome para Firefox"""
+        logger.info("Tentando configurar Chrome WebDriver...")
         
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
-        return driver
+        # Tentar usar Chrome primeiro
+        try:
+            options = ChromeOptions()
+            if self.headless:
+                options.add_argument("--headless")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--window-size=1920,1080")
+            options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+            
+            # Tentar encontrar o binário do Chrome em locais comuns
+            chrome_paths = [
+                "/usr/bin/google-chrome",
+                "/usr/bin/google-chrome-stable",
+                "/usr/bin/chromium",
+                "/usr/bin/chromium-browser",
+                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",  # macOS
+                "C:\Program Files\Google\Chrome\Application\chrome.exe",    # Windows
+                "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+            ]
+            
+            for path in chrome_paths:
+                if os.path.exists(path):
+                    logger.info(f"Chrome encontrado em: {path}")
+                    options.binary_location = path
+                    break
+            
+            service = ChromeService(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            logger.info("Chrome WebDriver configurado com sucesso")
+            return driver
+        
+        except Exception as e:
+            logger.warning(f"Falha ao configurar Chrome WebDriver: {str(e)}")
+            logger.info("Tentando usar Firefox como alternativa...")
+            
+            # Fallback para Firefox
+            try:
+                options = FirefoxOptions()
+                if self.headless:
+                    options.add_argument("--headless")
+                
+                service = FirefoxService(GeckoDriverManager().install())
+                driver = webdriver.Firefox(service=service, options=options)
+                logger.info("Firefox WebDriver configurado com sucesso")
+                return driver
+                
+            except Exception as e:
+                logger.error(f"Falha ao configurar Firefox WebDriver: {str(e)}")
+                raise Exception("Não foi possível configurar nenhum navegador. Instale Chrome ou Firefox e tente novamente.")
     
     def search_articles(self, query, language="pt", start_year=2020, pages=3):
         """Busca artigos no Google Scholar"""

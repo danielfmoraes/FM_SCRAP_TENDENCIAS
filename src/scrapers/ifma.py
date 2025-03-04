@@ -7,29 +7,26 @@ from src.utils.helpers import clean_text, save_article, extract_date
 
 logger = logging.getLogger(__name__)
 
-class AbrafacScraper:
+class IfmaScraper:
     def __init__(self):
-        self.base_url = "https://abrafac.org.br/publicacoes"
+        self.base_url = "https://blog.ifma.org/all"
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
     
-    def get_publication_pages(self, max_pages=15):
-        """Obtém as URLs de todas as páginas de publicações"""
-        page_urls = []
+    def get_blog_pages(self, max_pages=5):
+        """Obtém as URLs de todas as páginas do blog"""
+        page_urls = [self.base_url]
         
-        for page_num in range(1, max_pages + 1):
-            if page_num == 1:
-                page_url = self.base_url
-            else:
-                page_url = f"{self.base_url}/page/{page_num}/"
-            
+        # O IFMA blog usa paginação com parâmetro page
+        for page_num in range(2, max_pages + 1):
+            page_url = f"{self.base_url}?page={page_num}"
             page_urls.append(page_url)
         
         return page_urls
     
     def get_article_links(self, page_url):
-        """Extrai links de artigos de uma página de publicações"""
+        """Extrai links de artigos de uma página do blog"""
         article_links = []
         
         try:
@@ -38,32 +35,27 @@ class AbrafacScraper:
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Estratégia 1: Procurar links dentro de elementos de título
-            title_links = soup.select('h2.entry-title a, h3.entry-title a')
+            # Os artigos do blog IFMA geralmente estão em elementos com classe 'post-item'
+            # ou dentro de elementos <article>
+            article_elements = soup.select('.post-item, article, .blog-post')
             
-            # Estratégia 2: Procurar links com atributo data-wpel-link="internal"
-            internal_links = soup.select('a[data-wpel-link="internal"]')
-            
-            # Estratégia 3: Procurar links dentro de divs de conteúdo
-            content_links = soup.select('div.entry-content a, div.post-content a, div.content a')
-            
-            # Estratégia 4: Procurar todos os artigos e seus links
-            article_elements = soup.select('article.post, article.type-post, div.post')
-            article_element_links = []
-            for article in article_elements:
-                link = article.select_one('a')
-                if link:
-                    article_element_links.append(link)
-            
-            # Combinar todas as estratégias
-            all_potential_links = title_links + internal_links + content_links + article_element_links
-            
-            # Filtrar links únicos que parecem ser artigos
-            for link in all_potential_links:
-                href = link.get('href')
-                if href and 'abrafac.org.br' in href and href not in article_links:
-                    # Filtrar apenas URLs que parecem ser artigos
-                    if '/page/' not in href and '/tag/' not in href and '/category/' not in href:
+            if not article_elements:
+                # Se não encontrar com os seletores específicos, procurar links que parecem ser de artigos
+                all_links = soup.select('a[href*="/blog/"]')
+                for link in all_links:
+                    href = link.get('href')
+                    if href and '/blog/' in href and href not in article_links:
+                        if not href.endswith('/all') and not 'page=' in href:
+                            article_links.append(href)
+            else:
+                # Extrair links dos elementos de artigo encontrados
+                for article in article_elements:
+                    link_tag = article.select_one('a')
+                    if link_tag and link_tag.get('href'):
+                        href = link_tag.get('href')
+                        # Garantir que o URL seja absoluto
+                        if href.startswith('/'):
+                            href = 'https://blog.ifma.org' + href
                         article_links.append(href)
             
             logger.info(f"Encontrados {len(article_links)} links de artigos na página {page_url}")
@@ -73,7 +65,7 @@ class AbrafacScraper:
                 logger.warning(f"Nenhum link encontrado na página {page_url}. Verificando HTML...")
                 # Imprimir alguns links da página para debug
                 all_links = soup.select('a')
-                for i, link in enumerate(all_links[:10]):  # Mostrar apenas os primeiros 10 links
+                for i, link in enumerate(all_links[:10]):
                     href = link.get('href')
                     text = link.text.strip()
                     logger.warning(f"Link {i+1}: {text} -> {href}")
@@ -92,24 +84,24 @@ class AbrafacScraper:
             soup = BeautifulSoup(response.text, 'html.parser')
             
             # Extrair título
-            title_tag = soup.select_one('h1.entry-title') or soup.select_one('h1') or soup.select_one('h2.entry-title')
+            title_tag = soup.select_one('h1.post-title, h1.entry-title, h1')
             title = title_tag.text.strip() if title_tag else "Sem título"
             
             # Extrair data
-            date_tag = soup.select_one('time.entry-date') or soup.select_one('span.posted-on time') or soup.select_one('span.posted-on')
+            date_tag = soup.select_one('.post-date, .published, time')
             date_str = date_tag.text.strip() if date_tag else None
             date = extract_date(date_str) if date_str else datetime.now()
             
             # Extrair autor
-            author_tag = soup.select_one('span.author') or soup.select_one('a.url.fn.n')
-            author = author_tag.text.strip() if author_tag else "ABRAFAC"
+            author_tag = soup.select_one('.post-author, .author, .byline')
+            author = author_tag.text.strip() if author_tag else "IFMA"
             
             # Extrair conteúdo
-            content_tag = soup.select_one('div.entry-content') or soup.select_one('div.post-content')
+            content_tag = soup.select_one('.post-body, .entry-content, article')
             
             if content_tag:
                 # Remover elementos indesejados
-                for unwanted in content_tag.select('script, style, iframe, .sharedaddy, .jp-relatedposts'):
+                for unwanted in content_tag.select('script, style, iframe'):
                     unwanted.decompose()
                 
                 content = content_tag.text.strip()
@@ -118,7 +110,7 @@ class AbrafacScraper:
             
             # Extrair categorias/tags
             categories = []
-            category_tags = soup.select('span.cat-links a') or soup.select('footer.entry-footer a[rel="category tag"]')
+            category_tags = soup.select('.post-tags a, .tags a, .categories a')
             
             for cat in category_tags:
                 categories.append(cat.text.strip())
@@ -131,8 +123,8 @@ class AbrafacScraper:
                 'author': author,
                 'content': content,
                 'categories': categories,
-                'source': 'ABRAFAC',
-                'language': 'pt'
+                'source': 'IFMA Blog',
+                'language': 'en'  # O blog da IFMA é em inglês
             }
             
             return article_data
@@ -145,12 +137,12 @@ class AbrafacScraper:
         """Executa o scraper completo"""
         all_articles = []
         
-        # Obter URLs das páginas de publicações
-        page_urls = self.get_publication_pages()
+        # Obter URLs das páginas do blog
+        page_urls = self.get_blog_pages()
         
         # Limitar o número de páginas se necessário
-        if limit:
-            page_urls = page_urls[:min(limit, len(page_urls))]
+        if limit and limit < len(page_urls):
+            page_urls = page_urls[:limit]
         
         # Coletar links de artigos de cada página
         all_article_links = []
@@ -159,7 +151,7 @@ class AbrafacScraper:
             all_article_links.extend(article_links)
             
             # Pausa para evitar sobrecarga no servidor
-            time.sleep(1)
+            time.sleep(2)
             
             # Verificar se atingiu o limite
             if limit and len(all_article_links) >= limit:
@@ -176,11 +168,11 @@ class AbrafacScraper:
                 all_articles.append(article_data)
             
             # Pausa para evitar sobrecarga no servidor
-            time.sleep(1)
+            time.sleep(2)
             
             # Verificar se atingiu o limite
             if limit and len(all_articles) >= limit:
                 break
         
-        logger.info(f"Coletados {len(all_articles)} artigos da ABRAFAC")
+        logger.info(f"Coletados {len(all_articles)} artigos do IFMA Blog")
         return all_articles
