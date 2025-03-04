@@ -1,0 +1,36 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="tendencias-fm",
+    version="0.1.0",
+    packages=find_packages(),
+    install_requires=[
+        "requests>=2.28.0",
+        "beautifulsoup4>=4.11.0",
+        "selenium>=4.8.0",
+        "webdriver-manager>=3.8.0",
+        "pandas>=1.5.0",
+        "nltk>=3.8.0",
+        "googletrans==4.0.0-rc1",
+        "python-dotenv>=1.0.0",
+        "matplotlib>=3.5.0",
+        "seaborn>=0.12.0",
+        "wordcloud>=1.8.0",
+        "textblob>=0.17.0",
+        "unidecode>=1.3.0",
+    ],
+    python_requires=">=3.8",
+    author="Seu Nome",
+    author_email="seu-email@exemplo.com",
+    description="Análise de tendências em Facility Management",
+    keywords="facility management, web scraping, análise de tendências",
+    url="https://github.com/seu-usuario/tendencias-fm",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
+)
