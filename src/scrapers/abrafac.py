@@ -38,33 +38,29 @@ class AbrafacScraper:
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Estratégia 1: Procurar links dentro de elementos de título
-            title_links = soup.select('h2.entry-title a, h3.entry-title a')
+            # Focar especificamente nos elementos de artigo com a estrutura correta
+            article_elements = soup.select('article.tstk-ele-blog, article.tstk-ele')
             
-            # Estratégia 2: Procurar links com atributo data-wpel-link="internal"
-            internal_links = soup.select('a[data-wpel-link="internal"]')
-            
-            # Estratégia 3: Procurar links dentro de divs de conteúdo
-            content_links = soup.select('div.entry-content a, div.post-content a, div.content a')
-            
-            # Estratégia 4: Procurar todos os artigos e seus links
-            article_elements = soup.select('article.post, article.type-post, div.post')
-            article_element_links = []
             for article in article_elements:
-                link = article.select_one('a')
-                if link:
-                    article_element_links.append(link)
-            
-            # Combinar todas as estratégias
-            all_potential_links = title_links + internal_links + content_links + article_element_links
-            
-            # Filtrar links únicos que parecem ser artigos
-            for link in all_potential_links:
-                href = link.get('href')
-                if href and 'abrafac.org.br' in href and href not in article_links:
-                    # Filtrar apenas URLs que parecem ser artigos
-                    if '/page/' not in href and '/tag/' not in href and '/category/' not in href:
+                # Procurar o link dentro do título do post
+                link_tag = article.select_one('h3.tstk-post-title a, div.post-item a[data-wpel-link="internal"]')
+                
+                if link_tag and link_tag.get('href'):
+                    href = link_tag.get('href')
+                    if 'abrafac.org.br' in href and href not in article_links:
                         article_links.append(href)
+            
+            # Se não encontrar com o seletor específico, tentar uma abordagem mais direta
+            if not article_links:
+                # Procurar links com o atributo data-wpel-link="internal"
+                internal_links = soup.select('a[data-wpel-link="internal"]')
+                
+                for link in internal_links:
+                    href = link.get('href')
+                    if href and 'abrafac.org.br' in href and href not in article_links:
+                        # Filtrar apenas URLs que parecem ser artigos
+                        if '/page/' not in href and '/tag/' not in href and '/category/' not in href:
+                            article_links.append(href)
             
             logger.info(f"Encontrados {len(article_links)} links de artigos na página {page_url}")
             
@@ -72,8 +68,8 @@ class AbrafacScraper:
             if not article_links:
                 logger.warning(f"Nenhum link encontrado na página {page_url}. Verificando HTML...")
                 # Imprimir alguns links da página para debug
-                all_links = soup.select('a')
-                for i, link in enumerate(all_links[:10]):  # Mostrar apenas os primeiros 10 links
+                all_links = soup.select('a[data-wpel-link="internal"]')
+                for i, link in enumerate(all_links[:10]):
                     href = link.get('href')
                     text = link.text.strip()
                     logger.warning(f"Link {i+1}: {text} -> {href}")
