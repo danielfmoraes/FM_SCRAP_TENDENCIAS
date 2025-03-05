@@ -87,7 +87,20 @@ class InfraFMScraper:
             
             # Extrair título
             title_tag = soup.select_one('h1.titulo_texto') or soup.select_one('h1')
-            title = title_tag.text.strip() if title_tag else "Sem título"
+            title = title_tag.text.strip() if title_tag else None
+            
+            # Se não encontrou o título na página, extrair da URL
+            if not title or title == "Sem título":
+                # Extrair o título da URL
+                url_parts = article_url.split('/')
+                if len(url_parts) > 0:
+                    url_title = url_parts[-1]
+                    # Substituir hífens por espaços e capitalizar
+                    url_title = url_title.replace('-', ' ')
+                    title = url_title.capitalize()
+            
+            if not title:
+                title = "Sem título"
             
             # Extrair data
             date_tag = soup.select_one('span.data_texto') or soup.select_one('div.data')

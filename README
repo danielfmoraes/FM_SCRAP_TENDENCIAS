@@ -1,62 +1,62 @@
-# Tendências em Facility Management
-
+Tendências em Facility Management
 Este projeto realiza web scraping de diversas fontes para coletar, analisar e categorizar tendências em Facility Management (FM), com foco em conteúdo em português e outras línguas.
 
-## 📋 Visão Geral
-
+📋 Visão Geral
 O projeto coleta artigos, pesquisas e publicações sobre Facility Management de várias fontes, incluindo:
 
-- ABRAFAC (Associação Brasileira de Facility Management)
-- InfraFM
-- Google Scholar
-- Outras fontes internacionais
-
+ABRAFAC (Associação Brasileira de Facility Management)
+InfraFM
+IFMA (International Facility Management Association)
+Google Scholar
 Os dados coletados são processados, categorizados e armazenados para análise de tendências no setor de FM.
 
-## 🚀 Funcionalidades
+🚀 Funcionalidades
+Web scraping de múltiplas fontes especializadas em FM
+Processamento e limpeza de texto
+Tradução de conteúdo de outros idiomas para português
+Categorização automática de tendências
+Armazenamento estruturado dos dados
+Análise de tendências e geração de relatórios
+📦 Instalação
+Pré-requisitos
+Python 3.8+
+Pip (gerenciador de pacotes Python)
+Chrome ou Firefox (para scrapers baseados em Selenium)
+Passos para instalação
+Clone o repositório:
 
-- Web scraping de múltiplas fontes especializadas em FM
-- Processamento e limpeza de texto
-- Tradução de conteúdo de outros idiomas para português
-- Categorização automática de tendências
-- Armazenamento estruturado dos dados
-- Análise de tendências e geração de relatórios
+git clone https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git
+cd FM_SCRAP_TENDENCIAS
+Crie e ative um ambiente virtual:
 
-## 📦 Instalação
+python -m venv .venv
+source .venv/bin/activate  # No Windows: .venv\Scripts\activate
+Instale as dependências:
 
-### Pré-requisitos
-
-- Python 3.8+
-- Pip (gerenciador de pacotes Python)
-- Chrome ou Chromium (para scrapers baseados em Selenium)
-
-### Passos para instalação
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git
-   cd tendencias-fm
-
-2.Crie e ative um ambiente virtual:
-    python -m venv .venv
-    source .venv/bin/activate  # No Windows: .venv\Scripts\activate
-3.Instale o projeto em modo de desenvolvimento:
-  pip install -e .
-
-4.Configure as variáveis de ambiente:
-    cp .env.example .env
-    # Edite o arquivo .env com suas chaves de API e configurações
-
+pip install -r requirements.txt
 🔧 Uso
-Executar coleta completa
-    python main.py
-Executar scrapers específicos
-    python main.py --sources abrafac infrafm
-Definir limite de artigos
-    python main.py --limit 50
-Gerar relatório de tendências
-    python main.py --report
+Coleta de Dados (Scraper)
+O projeto agora está dividido em dois scripts principais: scraper.py para coleta de dados e report.py para geração de relatórios.
 
+Executar coleta completa:
+
+python scraper.py
+Executar scrapers específicos:
+
+python scraper.py --sources abrafac infrafm ifma
+Definir limite de artigos:
+
+python scraper.py --limit 5
+Traduzir conteúdo não português:
+
+python scraper.py --translate
+Geração de Relatórios
+Gerar relatório de tendências a partir dos dados coletados:
+
+python report.py
+Especificar arquivo de entrada e saída:
+
+python report.py --input data/processed/articles_processed.csv --output meu_relatorio.html
 📊 Análise de Dados
 Os dados coletados são processados para identificar:
 
@@ -65,7 +65,6 @@ Tecnologias mais mencionadas
 Tendências de sustentabilidade
 Práticas inovadoras de gestão
 Comparação entre tendências nacionais e internacionais
-
 🗂️ Estrutura do Projeto
 .venv/
 ├── src/
@@ -73,6 +72,7 @@ Comparação entre tendências nacionais e internacionais
 │   │   ├── __init__.py
 │   │   ├── abrafac.py
 │   │   ├── infrafm.py
+│   │   ├── ifma.py
 │   │   └── google_scholar.py
 │   ├── processors/       # Processamento dos dados coletados
 │   │   ├── __init__.py
@@ -82,15 +82,14 @@ Comparação entre tendências nacionais e internacionais
 │   └── utils/            # Funções utilitárias
 │       ├── __init__.py
 │       └── helpers.py
-├── data/                 # Dados coletados e processados
+├── data/                 # Dados coletados e processados (ignorados pelo git)
 │   ├── raw/              # Dados brutos
 │   └── processed/        # Dados processados
-├── main.py               # Ponto de entrada do programa
-├── setup.py              # Configuração de instalação
+├── scraper.py            # Script para coleta de dados
+├── report.py             # Script para geração de relatórios
 ├── README.md             # Este arquivo
 ├── LICENSE               # Licença do projeto
 └── requirements.txt      # Dependências
-
 📝 Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para detalhes.
 
@@ -102,17 +101,13 @@ Crie sua Feature Branch (git checkout -b feature/AmazingFeature)
 Commit suas mudanças (git commit -m 'Add some AmazingFeature')
 Push para a Branch (git push origin feature/AmazingFeature)
 Abra um Pull Request
-
 📞 Contato
-Seu Nome - [danielfmoraes@proton.me](mailto:danielfmoraes@proton.me)
+Daniel Moraes - [danielfmoraes@proton.me](mailto:danielfmoraes@proton.me)
 
-Link do Projeto: [https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git)
+Link do Projeto: [https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git](https://github.com/danielfmoraes/FM_SCRAP_TENDENCIAS.git)
 
 🙏 Agradecimentos
 [ABRAFAC](https://abrafac.org.br/) por disponibilizar conteúdo sobre FM
 [InfraFM](https://www.infrafm.com.br/) por seus artigos especializados
 [IFMA](https://blog.ifma.org/all) por seus artigos especializados
-
-Todos os pesquisadores e profissionais que contribuem para o avanço do Facility Management `
-
-
+Todos os pesquisadores e profissionais que contribuem para o avanço do Facility Management
